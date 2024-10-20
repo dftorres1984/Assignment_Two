@@ -1,0 +1,180 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(readxl)
+#install.packages("rio")
+#file.choose() found the directory path for each file
+LIED <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/LIED_6.6.xlsx")
+V_Dem <- read.csv("/Users/dftorres/Documents/GitHub/DPP690/Week-One-Assignment/Data/V_Dem_CORE.csv")
+Freedom_House <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=2)
+Freedom_House_2 <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=3)
+head(LIED)
+head(V_Dem)
+head(Freedom_House)
+```
+
+
+```{r}
+#LIED Dataset 
+
+#I load the packages that I may need. 
+library(dplyr) 
+library(stringr) 
+
+# I start the cleaning by checking the type of characters in this dataset. All of the columns with data are numeric; obviously the countryn column is character.  
+str(LIED)
+#They're all numeric except country which is a character string. This is a good sign. 
+
+#I check for NAs. 
+colSums(is.na(LIED)) 
+# I found that almost all of the NAs are in "V-Dem" column that I will not use and 1 NA exists in the YEAR column which is odd. 
+
+#I wanted to confirm which row in the column Year had a "NA"  
+LIED_NA_Year <- LIED[!complete.cases(LIED$year),] 
+
+#I created a dataframe and determined it was for CHILE which I will not use when subset the data. This confirms it was likely an error by the creator of the dataset. 
+
+#This line removes any whitespace in the country column
+LIED$countryn=trimws(LIED$countryn, whitespace = "[\\h\\v]")
+
+#Now clean file 
+nowClean_LEAD <- LIED
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(nowClean_LEAD,file.path(folder, "nowClean_LEAD.csv"))
+} else {
+  write.csv(nowClean_LEAD,file.path(folder, "nowClean_LEAD.csv"))}
+```
+
+
+```{r}
+#I rename columns like "countryn" with country_name and capitalize the following columns: year, male_suffrage, female_suffrage, political_liberties, democratic_breakdown, and sovereign.     
+LIED_Updated <- LIED %>% rename(Country = countryn, Year = year, Male_Suffrage = male_suffrage, Female_Suffrage = female_suffrage, Political_Liberties = political_liberties, Democratic_Breakdown = democratic_breakdown, Sovereign = sovereign)
+
+#Select columns "countryn" "male_suffrage" "female_suffrage" "political_liberties" "democratic_breakdown" "sovereign" 
+LIED_Updated <- LIED_Updated %>% select(Country, Year, Male_Suffrage, Female_Suffrage, Political_Liberties, Democratic_Breakdown, Sovereign)
+
+#Subset "Country_Name" for all major EU countries, USA, Canada, Japan, South Korea, New Zealand, and Australia
+LIED_Updated <- LIED_Updated %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "Korea, South", "Portugal", "Japan", "Belgium", "Czech Republic", "Czechoslovakia", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
+
+#Now, filter out the data for just the years 1991 until 2021. 
+LIED_Updated <- LIED_Updated %>% filter(Year>= 2003 & Year <= 2021)
+
+#Replace the country "Czechoslavakia" with "Czech Republic" specifically for years 1991, 1992. 
+LIED_Updated$Country <- gsub('Czechoslavakia', 'Czech Republic', LIED_Updated$Country)
+
+#checking for NAs in the formatted dataset LIED and they're all gone
+colSums(is.na(LIED_Updated))
+```
+
+
+```{r}
+# Freedom_House_Two
+library(tidyr)
+library(dplyr)
+library(readr)
+
+#My cleaning starts with a check of the type of data in each column. They're all characters. 
+str(Freedom_House_2)
+
+#I then want to check the NAs. There are no NAs.  
+colSums(is.na(Freedom_House_2))
+
+#I want to check if the numbers in the column are actual numbers 
+grep("\\D", Freedom_House_2$`FIW03 PR`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW04 PR`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW05 PR`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW03 CL`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW04 CL`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW05 CL`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW03 Total`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW04 Total`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW05 Total`, value = TRUE)
+
+#The search found the negative numbers and dashes "-". According to the Freedom House webiste, negative numbers were reserved for countries with very low Political Rights scores. All dashes were converted to NAs.   
+Freedom_House_2_Updated <- Freedom_House_2 %>% mutate(across(c(`FIW03 PR`,`FIW04 PR`,`FIW05 PR`, `FIW03 CL`,`FIW04 CL`, `FIW05 CL`, `FIW03 Total`, `FIW04 Total`,`FIW05 Total`), ~ as.numeric(as.character(.))))
+
+#I checked if I converted the columns to numeric
+sapply(Freedom_House_2_Updated, class)
+
+# I want to change "Country/Territory" to "Country" 
+Freedom_House_2_Updated <- Freedom_House_2 %>% rename(Country = "Country/Territory", Political_Rights_2003 = `FIW03 PR`, Political_Rights_2004 = `FIW04 PR`, Political_Rights_2005 = `FIW05 PR`, Civil_Liberties_2003 = `FIW03 CL`, Civil_Liberties_2004 = `FIW04 CL`, Civil_Liberties_2005 = `FIW05 CL`, Total_Score_2003 = `FIW03 Total`, Total_Score_2004 = `FIW04 Total`, Total_Score_2005 = `FIW05 Total`)
+
+#I want to eliminate the "C/T?" column 
+Freedom_House_2_Updated <- subset(Freedom_House_2_Updated, select = -`C/T?`)
+
+#Subset the countries to match the countries in LIED database 
+Freedom_House_2_Updated <- Freedom_House_2_Updated %>% filter(Country %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
+
+#Confirming that the columns of data are numeric and not character
+sapply(Freedom_House_2_Updated, class)
+
+#I'll need to merge the Freedom House Two data with Freedom House
+```
+
+
+```{r}
+#Freedom House 
+# Freedom_House_Two
+library(tidyr)
+library(dplyr)
+#The type of data looks good. The non-numeric columns are character and the columns of data are all numeric. 
+str(Freedom_House)
+#I'll need to rename "PR" "Political_Rights" CL as "Civil_Liberties" and "Total" as "Total Score" convert "Edition" into "Year"
+Freedom_House_Updated <- Freedom_House %>% rename(Country = `Country/Territory`, Year = `Edition`, Political_Rights = `PR`, Civil_Liberties = `CL`, Total_Score = `Total`)
+#I want to keep the major columns "Country" "Political_Rights" "Civil_Liberties" and "Total_Score" 
+Freedom_House_Updated <- Freedom_House_Updated %>% select("Country", "Year", "Political_Rights", "Civil_Liberties", "Total_Score")
+#Subset the countries for the same ones in Freedom_House_2  
+Freedom_House_Updated <- Freedom_House_Updated %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
+#Checking NAs for Freedom_House_Updated dataframe 
+sapply(Freedom_House_Updated, class)
+# I'll need to merge Freedom_House_2_Updated with Freedom_House_Updated using column Country    
+```
+
+```{r}
+#I'll check the V-Dem categories  
+str(V_Dem)
+#I'll then subset the data for "country_name", "year", "v2x_polyarchy", "v2x_libdem", "v2x_partipdem", 
+V_Dem_Updated <- V_Dem %>% select(`country_name`, `year`, `v2x_polyarchy`, `v2x_libdem`, `v2x_partipdem`) 
+#I'll then rename the categories so it makes sense 
+V_Dem_Updated <- V_Dem_Updated %>% rename(Country = `country_name`, Year = `year`, Polyarchy_Score = `v2x_polyarchy`, Liberal_Democracy_Score = `v2x_libdem`, Participatory_Democracy_Score = `v2x_partipdem`) 
+#I'll need to subset for years 2003 to 2020 so it matches Freedom House and LEAD 
+V_Dem_Updated <- V_Dem_Updated %>% subset(Year>= 2003 & Year<=2020)
+#I'll need to subset countries so it matches the other datasets 
+V_Dem_Updated <- V_Dem_Updated %>% subset(Country %in% c("Greece", "Italy", "Austria", "United States of America", "South Korea", "Portugal", "Japan", "Belgium", "Czechia", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
+#Change names from United States of America to United States in order to match the other three dataframes. I also have to change Czechia to Czech Republic. 
+V_Dem_Updated$Country <- gsub('United States of America', 'United States', V_Dem_Updated$Country)
+V_Dem_Updated$Country <- gsub('Czechia', 'Czech Republic', V_Dem_Updated$Country)
+#Checking for NAs in the V_Dem_Updated dataset
+colSums(is.na(V_Dem_Updated))
+
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(nowClean,file.path(folder, "nowClean.csv"))
+} else {
+  write.csv(nowClean,file.path(folder, "nowClean.csv"))}
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
