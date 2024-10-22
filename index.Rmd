@@ -11,7 +11,9 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r}
 library(readxl)
-#install.packages("rio")
+library(tidyr)
+library(dplyr)
+library(readr)
 #file.choose() found the directory path for each file
 LIED <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/LIED_6.6.xlsx")
 V_Dem <- read.csv("/Users/dftorres/Documents/GitHub/DPP690/Week-One-Assignment/Data/V_Dem_CORE.csv")
@@ -24,7 +26,7 @@ head(Freedom_House)
 
 
 ```{r}
-#LIED Dataset 
+#Cleaning LIED Dataset 
 
 #I load the packages that I may need. 
 library(dplyr) 
@@ -43,7 +45,7 @@ LIED_NA_Year <- LIED[!complete.cases(LIED$year),]
 
 #I created a dataframe and determined it was for CHILE which I will not use when subset the data. This confirms it was likely an error by the creator of the dataset. 
 
-#This line removes any whitespace in the country column
+#This removes any whitespace in the country column
 LIED$countryn=trimws(LIED$countryn, whitespace = "[\\h\\v]")
 
 #Now clean file 
@@ -61,31 +63,37 @@ if(!dir.exists(folder)) {
 
 
 ```{r}
-#I rename columns like "countryn" with country_name and capitalize the following columns: year, male_suffrage, female_suffrage, political_liberties, democratic_breakdown, and sovereign.     
-LIED_Updated <- LIED %>% rename(Country = countryn, Year = year, Male_Suffrage = male_suffrage, Female_Suffrage = female_suffrage, Political_Liberties = political_liberties, Democratic_Breakdown = democratic_breakdown, Sovereign = sovereign)
+#Formatting LIED dataset
+#Import saved .csv file
+LIED_import <- rio::import("https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/nowClean_LEAD.csv")
 
-#Select columns "countryn" "male_suffrage" "female_suffrage" "political_liberties" "democratic_breakdown" "sovereign" 
+#I rename columns like "countryn" as country_name and capitalize the following columns: year, male_suffrage, female_suffrage, political_liberties, democratic_breakdown, and sovereign.     
+LIED_Updated <- LIED_import %>% rename(Country = countryn, Year = year, Male_Suffrage = male_suffrage, Female_Suffrage = female_suffrage, Political_Liberties = political_liberties, Democratic_Breakdown = democratic_breakdown, Sovereign = sovereign)
+
+#I select columns "countryn" "male_suffrage" "female_suffrage" "political_liberties" "democratic_breakdown" "sovereign" 
 LIED_Updated <- LIED_Updated %>% select(Country, Year, Male_Suffrage, Female_Suffrage, Political_Liberties, Democratic_Breakdown, Sovereign)
 
-#Subset "Country_Name" for all major EU countries, USA, Canada, Japan, South Korea, New Zealand, and Australia
-LIED_Updated <- LIED_Updated %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "Korea, South", "Portugal", "Japan", "Belgium", "Czech Republic", "Czechoslovakia", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
+#I subset the df by filtering "Country_Name" for all major EU countries, USA, Canada, Japan, South Korea, New Zealand, and Australia and for years 2003 to 2020. I selected these years because all three datasets have data for these years. 
+LIED_Updated <- LIED_Updated %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "Korea, South", "Portugal", "Japan", "Belgium", "Czech Republic", "Czechoslovakia", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia") & Year >= 2003 & Year <= 2020)
 
-#Now, filter out the data for just the years 1991 until 2021. 
-LIED_Updated <- LIED_Updated %>% filter(Year>= 2003 & Year <= 2021)
-
-#Replace the country "Czechoslavakia" with "Czech Republic" specifically for years 1991, 1992. 
-LIED_Updated$Country <- gsub('Czechoslavakia', 'Czech Republic', LIED_Updated$Country)
-
-#checking for NAs in the formatted dataset LIED and they're all gone
+#checking for NAs in the formatted dataset LIED to make sure they're all gone
 colSums(is.na(LIED_Updated))
+Formatted_LIED <- LIED_Updated
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(Formatted_LIED,file.path(folder, "Formatted_LIED.csv"))
+} else {
+  write.csv(Formatted_LIED,file.path(folder, "Formatted_LIED.csv"))}
 ```
 
 
 ```{r}
-# Freedom_House_Two
-library(tidyr)
-library(dplyr)
-library(readr)
+# Data Cleaning Freedom_House_Two dataset
+
 
 #My cleaning starts with a check of the type of data in each column. They're all characters. 
 str(Freedom_House_2)
@@ -105,43 +113,88 @@ grep("\\D", Freedom_House_2$`FIW04 Total`, value = TRUE)
 grep("\\D", Freedom_House_2$`FIW05 Total`, value = TRUE)
 
 #The search found the negative numbers and dashes "-". According to the Freedom House webiste, negative numbers were reserved for countries with very low Political Rights scores. All dashes were converted to NAs.   
-Freedom_House_2_Updated <- Freedom_House_2 %>% mutate(across(c(`FIW03 PR`,`FIW04 PR`,`FIW05 PR`, `FIW03 CL`,`FIW04 CL`, `FIW05 CL`, `FIW03 Total`, `FIW04 Total`,`FIW05 Total`), ~ as.numeric(as.character(.))))
+Clean_Freedom_House_2 <- Freedom_House_2 %>% mutate(across(c(`FIW03 PR`,`FIW04 PR`,`FIW05 PR`, `FIW03 CL`,`FIW04 CL`, `FIW05 CL`, `FIW03 Total`, `FIW04 Total`,`FIW05 Total`), ~ as.numeric(as.character(.))))
 
-#I checked if I converted the columns to numeric
-sapply(Freedom_House_2_Updated, class)
+#I checked if I converted the data columns to numeric.
+sapply(Clean_Freedom_House_2, class)
 
-# I want to change "Country/Territory" to "Country" 
-Freedom_House_2_Updated <- Freedom_House_2 %>% rename(Country = "Country/Territory", Political_Rights_2003 = `FIW03 PR`, Political_Rights_2004 = `FIW04 PR`, Political_Rights_2005 = `FIW05 PR`, Civil_Liberties_2003 = `FIW03 CL`, Civil_Liberties_2004 = `FIW04 CL`, Civil_Liberties_2005 = `FIW05 CL`, Total_Score_2003 = `FIW03 Total`, Total_Score_2004 = `FIW04 Total`, Total_Score_2005 = `FIW05 Total`)
-
-#I want to eliminate the "C/T?" column 
-Freedom_House_2_Updated <- subset(Freedom_House_2_Updated, select = -`C/T?`)
-
-#Subset the countries to match the countries in LIED database 
-Freedom_House_2_Updated <- Freedom_House_2_Updated %>% filter(Country %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
-
-#Confirming that the columns of data are numeric and not character
-sapply(Freedom_House_2_Updated, class)
-
-#I'll need to merge the Freedom House Two data with Freedom House
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(Clean_Freedom_House_2,file.path(folder, "CleanData_Freedom_House_2.csv"))
+} else {
+  write.csv(Clean_Freedom_House_2,file.path(folder, "Clean_Freedom_House_2.csv"))}
 ```
 
 
 ```{r}
-#Freedom House 
-# Freedom_House_Two
+# Formatting Freedom_House_2 Dataset
+
+# I want to change "Country/Territory" to "Country" 
+Formatted_Freedom_House_2 <- Clean_Freedom_House_2 %>% rename(Country = "Country/Territory", Political_Rights_2003 = `FIW03 PR`, Political_Rights_2004 = `FIW04 PR`, Political_Rights_2005 = `FIW05 PR`, Civil_Liberties_2003 = `FIW03 CL`, Civil_Liberties_2004 = `FIW04 CL`, Civil_Liberties_2005 = `FIW05 CL`, Total_Score_2003 = `FIW03 Total`, Total_Score_2004 = `FIW04 Total`, Total_Score_2005 = `FIW05 Total`)
+
+#I want to eliminate the "C/T?" column 
+Formatted_Freedom_House_2 <- subset(Formatted_Freedom_House_2, select = -`C/T?`)
+
+#Subset the countries to match the countries in LIED database 
+Formatted_Freedom_House_2 <- Formatted_Freedom_House_2 %>% filter(Country %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
+
+#Confirming that the columns of data are numeric and not character
+sapply(Formatted_Freedom_House_2, class)
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(Formatted_Freedom_House_2,file.path(folder, "Formatted_Freedom_House_2.csv"))
+} else {
+  write.csv(Formatted_Freedom_House_2,file.path(folder, "Formatted_Freedom_House_2.csv"))}
+```
+
+
+```{r}
+#Data Cleaning Freedom House 
 library(tidyr)
 library(dplyr)
-#The type of data looks good. The non-numeric columns are character and the columns of data are all numeric. 
+#The type of data looks good. The non-numeric columns are character and the columns of data are all numeric.  
 str(Freedom_House)
+
+Clean_Freedom_House <- Freedom_House 
+
+#Saving Formatted file
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(Clean_Freedom_House,file.path(folder, "Clean_Freedom_House.csv"))
+} else {
+  write.csv(Clean_Freedom_House,file.path(folder, "Clean_Freedom_House.csv"))}
+```
+
+
+```{r}
+# Formatting Freedom_House Dataset
 #I'll need to rename "PR" "Political_Rights" CL as "Civil_Liberties" and "Total" as "Total Score" convert "Edition" into "Year"
-Freedom_House_Updated <- Freedom_House %>% rename(Country = `Country/Territory`, Year = `Edition`, Political_Rights = `PR`, Civil_Liberties = `CL`, Total_Score = `Total`)
+Formatted_Freedom_House <- Freedom_House %>% rename(Country = `Country/Territory`, Year = `Edition`, Political_Rights = `PR`, Civil_Liberties = `CL`, Total_Score = `Total`)
 #I want to keep the major columns "Country" "Political_Rights" "Civil_Liberties" and "Total_Score" 
-Freedom_House_Updated <- Freedom_House_Updated %>% select("Country", "Year", "Political_Rights", "Civil_Liberties", "Total_Score")
+Formatted_Freedom_House <- Formatted_Freedom_House %>% select("Country", "Year", "Political_Rights", "Civil_Liberties", "Total_Score")
 #Subset the countries for the same ones in Freedom_House_2  
-Freedom_House_Updated <- Freedom_House_Updated %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
+Formatted_Freedom_House <- Formatted_Freedom_House %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
 #Checking NAs for Freedom_House_Updated dataframe 
-sapply(Freedom_House_Updated, class)
-# I'll need to merge Freedom_House_2_Updated with Freedom_House_Updated using column Country    
+sapply(Formatted_Freedom_House, class)
+#Saving Formatted file
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.csv"))
+} else {
+  write.csv(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.csv"))}   
 ```
 
 ```{r}
