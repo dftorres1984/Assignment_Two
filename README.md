@@ -1,4 +1,6 @@
 # Assignment_Two
+You can see the code here [here](file:///Users/dftorres/Documents/GitHub/DPP690/Assignment_Two/index.html)
+
 Cleaning LEAD dataset 
 
 I examined the dataset for missing data. I found NAs and the type of data. I then determined that the NA was in the year column for a country. This was likely an error in the dataset. I made sure there were no whitespaces in the Country column. The data was mostly clean, so I saved it as a CSV file. 
