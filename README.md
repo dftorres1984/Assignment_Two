@@ -1,5 +1,5 @@
 # Assignment_Two
-You can see the code here [here](file:///Users/dftorres/Documents/GitHub/DPP690/Assignment_Two/index.html)
+You can see the code [here](file:///Users/dftorres/Documents/GitHub/DPP690/Assignment_Two/index.html)
 
 Cleaning LEAD dataset 
 
