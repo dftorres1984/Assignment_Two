@@ -1,16 +1,18 @@
 ---
-title: "R Notebook"
-output:
-  html_document:
-    df_print: paged
+title: "Assingment Two"
+format: html
+editor: visual
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+## Quarto
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
 ```{r}
-
 #I load the packages that I may need. 
 library(readxl)
 library(tidyr)
@@ -19,14 +21,13 @@ library(readr)
 library(stringr) 
 #file.choose() found the directory path for each file
 LIED <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/LIED_6.6.xlsx")
-V_Dem <- read.csv("/Users/dftorres/Documents/GitHub/DPP690/Week-One-Assignment/Data/V_Dem_CORE.csv")
 Freedom_House <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=2)
 Freedom_House_2 <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=3)
 head(LIED)
-head(V_Dem)
 head(Freedom_House)
 ```
 
+You can add options to executable code like this
 
 ```{r}
 #Cleaning LIED Dataset 
@@ -60,6 +61,37 @@ if(!dir.exists(folder)) {
   write.csv(nowClean_LEAD,file.path(folder, "nowClean_LEAD.csv"))}
 ```
 
+```{r}
+#Cleaning LIED Dataset 
+
+# I start the cleaning by checking the type of characters in this dataset. All of the columns with data are numeric; obviously the countryn column is character.  
+str(LIED)
+#They're all numeric except country which is a character string. This is a good sign. 
+
+#I check for NAs. 
+colSums(is.na(LIED)) 
+# I found that almost all of the NAs are in "V-Dem" column that I will not use and 1 NA exists in the YEAR column which is odd. 
+
+#I wanted to confirm which row in the column Year had a "NA"  
+LIED_NA_Year <- LIED[!complete.cases(LIED$year),] 
+
+#I created a dataframe and determined it was for CHILE which I will not use when subset the data. This confirms it was likely an error by the creator of the dataset. 
+
+#This removes any whitespace in the country column
+LIED$countryn=trimws(LIED$countryn, whitespace = "[\\h\\v]")
+
+#Now clean file 
+nowClean_LEAD <- LIED
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(nowClean_LEAD,file.path(folder, "nowClean_LEAD.csv"))
+} else {
+  write.csv(nowClean_LEAD,file.path(folder, "nowClean_LEAD.csv"))}
+```
 
 ```{r}
 #Formatting LIED dataset
@@ -90,7 +122,6 @@ if(!dir.exists(folder)) {
 } else {
   saveRDS(Formatted_LIED,file.path(folder, "Formatted_LIED.RDS"))}
 ```
-
 
 ```{r}
 # Data Cleaning Freedom_House_Two dataset
@@ -131,7 +162,6 @@ if(!dir.exists(folder)) {
   write.csv(Clean_Freedom_House_2,file.path(folder, "Clean_Freedom_House_2.csv"))}
 ```
 
-
 ```{r}
 # Formatting Freedom_House_2 Dataset
 #Import the clean data 
@@ -163,7 +193,6 @@ if(!dir.exists(folder)) {
   saveRDS(Formatted_Freedom_House_2,file.path(folder, "Formatted_Freedom_House_2.RDS"))}
 ```
 
-
 ```{r}
 #Data Cleaning Freedom House 
 
@@ -186,58 +215,8 @@ if(!dir.exists(folder)) {
   write.csv(Clean_Freedom_House,file.path(folder, "Clean_Freedom_House.csv"))}
 ```
 
-
 ```{r}
-# Formatting Freedom_House Dataset
-
-# Import clean Freedom House dataset
-Freedom_House_import <- rio::import("https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_Freedom_House.csv")  
-
-#I check the imported dataset
-str(Freedom_House_import)
-
-#I'll need to rename "PR" "Political_Rights" CL as "Civil_Liberties" and "Total" as "Total Score" convert "Edition" into "Year"
-Formatted_Freedom_House <- Freedom_House_import %>% rename(Country = `Country/Territory`, Year = `Edition`, Political_Rights = `PR`, Civil_Liberties = `CL`, Total_Score = `Total`)
-#I want to keep the major columns "Country", "Year", "Political_Rights" "Civil_Liberties" and "Total_Score" 
-Formatted_Freedom_House <- Formatted_Freedom_House %>% select("Country", "Year", "Political_Rights", "Civil_Liberties", "Total_Score")
-#Filter the countries and years for the same countries used in Freedom_House_2 and LIED  
-Formatted_Freedom_House <- Formatted_Freedom_House %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia") & Year>= 2003 & Year<=2020)
-#Checking NAs for Freedom_House_Updated dataframe 
-sapply(Formatted_Freedom_House, class)
-#Saving Formatted file
-folder <- "DataCleanAndFormatted"
-#check if the folder exists 
-if(!dir.exists(folder)) {
-  #Create folder 
-  dir.create(folder)
-  saveRDS(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.RDS"))
-} else {
-  saveRDS(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.RDS"))}   
-```
-
-```{r}
-# I will work on the V-Dem dataset in the near future
-#I'll check the V-Dem categories  
-str(V_Dem)
-#I'll then subset the data for "country_name", "year", "v2x_polyarchy", "v2x_libdem", "v2x_partipdem", 
-V_Dem_Updated <- V_Dem %>% select(`country_name`, `year`, `v2x_polyarchy`, `v2x_libdem`, `v2x_partipdem`) 
-#I'll then rename the categories so it makes sense 
-V_Dem_Updated <- V_Dem_Updated %>% rename(Country = `country_name`, Year = `year`, Polyarchy_Score = `v2x_polyarchy`, Liberal_Democracy_Score = `v2x_libdem`, Participatory_Democracy_Score = `v2x_partipdem`) 
-#I'll need to subset for years 2003 to 2020 so it matches Freedom House and LEAD 
-V_Dem_Updated <- V_Dem_Updated %>% subset(Year>= 2003 & Year<=2020)
-#I'll need to subset countries so it matches the other datasets 
-V_Dem_Updated <- V_Dem_Updated %>% subset(Country %in% c("Greece", "Italy", "Austria", "United States of America", "South Korea", "Portugal", "Japan", "Belgium", "Czechia", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
-#Change names from United States of America to United States in order to match the other three dataframes. I also have to change Czechia to Czech Republic. 
-V_Dem_Updated$Country <- gsub('United States of America', 'United States', V_Dem_Updated$Country)
-V_Dem_Updated$Country <- gsub('Czechia', 'Czech Republic', V_Dem_Updated$Country)
-#Checking for NAs in the V_Dem_Updated dataset
-colSums(is.na(V_Dem_Updated))
 
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-
+The `echo: false` option disables the printing of code (only output is displayed).

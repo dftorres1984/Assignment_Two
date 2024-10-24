@@ -10,7 +10,6 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 
 ```{r}
-
 #I load the packages that I may need. 
 library(readxl)
 library(tidyr)
@@ -19,14 +18,11 @@ library(readr)
 library(stringr) 
 #file.choose() found the directory path for each file
 LIED <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/LIED_6.6.xlsx")
-V_Dem <- read.csv("/Users/dftorres/Documents/GitHub/DPP690/Week-One-Assignment/Data/V_Dem_CORE.csv")
 Freedom_House <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=2)
 Freedom_House_2 <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=3)
 head(LIED)
-head(V_Dem)
 head(Freedom_House)
 ```
-
 
 ```{r}
 #Cleaning LIED Dataset 
@@ -60,7 +56,6 @@ if(!dir.exists(folder)) {
   write.csv(nowClean_LEAD,file.path(folder, "nowClean_LEAD.csv"))}
 ```
 
-
 ```{r}
 #Formatting LIED dataset
 #Import saved .csv file
@@ -90,7 +85,6 @@ if(!dir.exists(folder)) {
 } else {
   saveRDS(Formatted_LIED,file.path(folder, "Formatted_LIED.RDS"))}
 ```
-
 
 ```{r}
 # Data Cleaning Freedom_House_Two dataset
@@ -131,7 +125,6 @@ if(!dir.exists(folder)) {
   write.csv(Clean_Freedom_House_2,file.path(folder, "Clean_Freedom_House_2.csv"))}
 ```
 
-
 ```{r}
 # Formatting Freedom_House_2 Dataset
 #Import the clean data 
@@ -163,7 +156,6 @@ if(!dir.exists(folder)) {
   saveRDS(Formatted_Freedom_House_2,file.path(folder, "Formatted_Freedom_House_2.RDS"))}
 ```
 
-
 ```{r}
 #Data Cleaning Freedom House 
 
@@ -185,7 +177,6 @@ if(!dir.exists(folder)) {
 } else {
   write.csv(Clean_Freedom_House,file.path(folder, "Clean_Freedom_House.csv"))}
 ```
-
 
 ```{r}
 # Formatting Freedom_House Dataset
@@ -213,26 +204,6 @@ if(!dir.exists(folder)) {
   saveRDS(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.RDS"))
 } else {
   saveRDS(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.RDS"))}   
-```
-
-```{r}
-# I will work on the V-Dem dataset in the near future
-#I'll check the V-Dem categories  
-str(V_Dem)
-#I'll then subset the data for "country_name", "year", "v2x_polyarchy", "v2x_libdem", "v2x_partipdem", 
-V_Dem_Updated <- V_Dem %>% select(`country_name`, `year`, `v2x_polyarchy`, `v2x_libdem`, `v2x_partipdem`) 
-#I'll then rename the categories so it makes sense 
-V_Dem_Updated <- V_Dem_Updated %>% rename(Country = `country_name`, Year = `year`, Polyarchy_Score = `v2x_polyarchy`, Liberal_Democracy_Score = `v2x_libdem`, Participatory_Democracy_Score = `v2x_partipdem`) 
-#I'll need to subset for years 2003 to 2020 so it matches Freedom House and LEAD 
-V_Dem_Updated <- V_Dem_Updated %>% subset(Year>= 2003 & Year<=2020)
-#I'll need to subset countries so it matches the other datasets 
-V_Dem_Updated <- V_Dem_Updated %>% subset(Country %in% c("Greece", "Italy", "Austria", "United States of America", "South Korea", "Portugal", "Japan", "Belgium", "Czechia", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
-#Change names from United States of America to United States in order to match the other three dataframes. I also have to change Czechia to Czech Republic. 
-V_Dem_Updated$Country <- gsub('United States of America', 'United States', V_Dem_Updated$Country)
-V_Dem_Updated$Country <- gsub('Czechia', 'Czech Republic', V_Dem_Updated$Country)
-#Checking for NAs in the V_Dem_Updated dataset
-colSums(is.na(V_Dem_Updated))
-
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
