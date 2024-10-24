@@ -1,0 +1,223 @@
+---
+title: "index"
+format: html
+output-dir: DataCleanAndFormatted
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+#I load the packages that I may need. 
+library(readxl)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(stringr) 
+#file.choose() found the directory path for each file
+LIED <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/LIED_6.6.xlsx")
+Freedom_House <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=2)
+Freedom_House_2 <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=3)
+head(LIED)
+head(Freedom_House)
+```
+
+You can add options to executable code like this
+
+```{r}
+#Cleaning LIED Dataset 
+
+# I start the cleaning by checking the type of characters in this dataset. All of the columns with data are numeric; obviously the countryn column is character.  
+str(LIED)
+#They're all numeric except country which is a character string. This is a good sign. 
+
+#I check for NAs. 
+colSums(is.na(LIED)) 
+# I found that almost all of the NAs are in "V-Dem" column that I will not use and 1 NA exists in the YEAR column which is odd. 
+
+#I wanted to confirm which row in the column Year had a "NA"  
+LIED_NA_Year <- LIED[!complete.cases(LIED$year),] 
+
+#I created a dataframe and determined it was for CHILE which I will not use when subset the data. This confirms it was likely an error by the creator of the dataset. 
+
+#This removes any whitespace in the country column
+LIED$countryn=trimws(LIED$countryn, whitespace = "[\\h\\v]")
+
+#Now clean file 
+nowClean_LEAD <- LIED
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(nowClean_LEAD,file.path(folder, "nowClean_LEAD.csv"), row.names = F)
+} else {
+  write.csv(nowClean_LEAD,file.path(folder, "nowClean_LEAD.csv"), row.names = F)}
+```
+
+```{r}
+#Formatting LIED dataset
+#Import saved .csv file
+LIED_import <- rio::import("https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/nowClean_LEAD.csv")
+#check the imported file
+str(LIED_import)
+
+#I rename columns like "countryn" as country_name and capitalize the following columns: year, male_suffrage, female_suffrage, political_liberties, democratic_breakdown, and sovereign.     
+LIED_Updated <- LIED_import %>% rename(Country = countryn, Year = year, Male_Suffrage = male_suffrage, Female_Suffrage = female_suffrage, Political_Liberties = political_liberties, Democratic_Breakdown = democratic_breakdown, Sovereign = sovereign)
+
+#I select columns "countryn" "male_suffrage" "female_suffrage" "political_liberties" "democratic_breakdown" "sovereign" 
+LIED_Updated <- LIED_Updated %>% select(Country, Year, Male_Suffrage, Female_Suffrage, Political_Liberties, Democratic_Breakdown, Sovereign)
+
+#I subset the df by filtering "Country_Name" for all major EU countries, USA, Canada, Japan, South Korea, New Zealand, and Australia and for years 2003 to 2020. I selected these years because all three datasets have data for these years. 
+LIED_Updated <- LIED_Updated %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "Korea, South", "Portugal", "Japan", "Belgium", "Czech Republic", "Czechoslovakia", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia") & Year >= 2003 & Year <= 2020)
+
+#checking for NAs in the formatted dataset LIED to make sure they're all gone
+colSums(is.na(LIED_Updated))
+Formatted_LIED <- LIED_Updated
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  saveRDS(Formatted_LIED,file.path(folder, "Formatted_LIED.RDS"))
+} else {
+  saveRDS(Formatted_LIED,file.path(folder, "Formatted_LIED.RDS"))}  
+```
+
+```{r}
+# Data Cleaning Freedom_House_Two dataset
+
+#My cleaning starts with a check of the type of data in each column. The columns with numeric data are characters. 
+str(Freedom_House_2)
+
+#I then want to check the NAs. There are no NAs.  
+colSums(is.na(Freedom_House_2))
+
+#I want to check if the numbers in the column are actual numbers 
+grep("\\D", Freedom_House_2$`FIW03 PR`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW04 PR`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW05 PR`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW03 CL`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW04 CL`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW05 CL`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW03 Total`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW04 Total`, value = TRUE)
+grep("\\D", Freedom_House_2$`FIW05 Total`, value = TRUE)
+
+#The search found the negative numbers and dashes "-". According to the Freedom House webiste, negative numbers were reserved for countries with very low Political Rights scores. All dashes were converted to NAs.   
+Clean_Freedom_House_2 <- Freedom_House_2 %>% mutate(across(c(`FIW03 PR`,`FIW04 PR`,`FIW05 PR`, `FIW03 CL`,`FIW04 CL`, `FIW05 CL`, `FIW03 Total`, `FIW04 Total`,`FIW05 Total`), ~ as.numeric(as.character(.))))
+
+#I wanted to make sure there are no whitespaces in the country column
+Freedom_House_2$`Country/Territory`=trimws(Freedom_House_2$`Country/Territory`, whitespace = "[\\h\\v]")
+
+#I checked if I converted the data columns to numeric.
+sapply(Clean_Freedom_House_2, class)
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(Clean_Freedom_House_2,file.path(folder, "CleanData_Freedom_House_2.csv"), row.names = F)
+} else {
+  write.csv(Clean_Freedom_House_2,file.path(folder, "Clean_Freedom_House_2.csv"), row.names = F)}
+```
+
+```{r}
+# Formatting Freedom_House_2 Dataset
+#Import the clean data 
+
+Freedom_House_2_import <- rio::import("https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_Freedom_House_2.csv")
+
+#I check the imported file and it looks correct.  
+str(Freedom_House_2_import)
+
+# I want to change "Country/Territory" to "Country" and rename the other columns  
+Formatted_Freedom_House_2 <- Freedom_House_2_import %>% rename(Country = "Country/Territory", Political_Rights_2003 = `FIW03 PR`, Political_Rights_2004 = `FIW04 PR`, Political_Rights_2005 = `FIW05 PR`, Civil_Liberties_2003 = `FIW03 CL`, Civil_Liberties_2004 = `FIW04 CL`, Civil_Liberties_2005 = `FIW05 CL`, Total_Score_2003 = `FIW03 Total`, Total_Score_2004 = `FIW04 Total`, Total_Score_2005 = `FIW05 Total`)
+
+#I want to eliminate the "C/T?" column 
+Formatted_Freedom_House_2 <- subset(Formatted_Freedom_House_2, select = -`C/T?`)
+
+#Filter the countries to match the countries in LIED database.  
+Formatted_Freedom_House_2 <- Formatted_Freedom_House_2 %>% filter(Country %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
+
+#Confirming that the columns of data are numeric and not character
+str(Formatted_Freedom_House_2)
+
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  saveRDS(Formatted_Freedom_House_2,file.path(folder, "Formatted_Freedom_House_2.RDS"))
+} else {
+  saveRDS(Formatted_Freedom_House_2,file.path(folder, "Formatted_Freedom_House_2.RDS"))}
+
+```
+
+```{r}
+#Data Cleaning Freedom House 
+
+#The type of data looks good. The non-numeric columns are character and the columns with data are all numeric. This is the main dataset used by Freedom House so I'm not surprised that the data quality is high.   
+str(Freedom_House)
+
+#I wanted to make sure there are no whitespaces in the country column
+Freedom_House$`Country/Territory`=trimws(Freedom_House$`Country/Territory`, whitespace = "[\\h\\v]")
+
+Clean_Freedom_House <- Freedom_House 
+
+#Saving Formatted file
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(Clean_Freedom_House,file.path(folder, "Clean_Freedom_House.csv"), row.names = F)
+} else {
+  write.csv(Clean_Freedom_House,file.path(folder, "Clean_Freedom_House.csv"), row.names = F)}
+```
+
+```{r}
+# Formatting Freedom_House Dataset
+
+# Import clean Freedom House dataset
+Freedom_House_import <- rio::import("https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_Freedom_House.csv")  
+
+#I check the imported dataset
+str(Freedom_House_import)
+
+#I'll need to rename "PR" "Political_Rights" CL as "Civil_Liberties" and "Total" as "Total Score" convert "Edition" into "Year"
+Formatted_Freedom_House <- Freedom_House_import %>% rename(Country = `Country/Territory`, Year = `Edition`, Political_Rights = `PR`, Civil_Liberties = `CL`, Total_Score = `Total`)
+#I want to keep the major columns "Country", "Year", "Political_Rights" "Civil_Liberties" and "Total_Score" 
+Formatted_Freedom_House <- Formatted_Freedom_House %>% select("Country", "Year", "Political_Rights", "Civil_Liberties", "Total_Score")
+#Filter the countries and years for the same countries used in Freedom_House_2 and LIED  
+Formatted_Freedom_House <- Formatted_Freedom_House %>% filter(`Country` %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia") & Year>= 2003 & Year<=2020)
+#Checking NAs for Freedom_House_Updated dataframe 
+sapply(Formatted_Freedom_House, class)
+#Saving Formatted file
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  saveRDS(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.RDS"))
+} else {
+  saveRDS(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.RDS"))}   
+
+str(Formatted_Freedom_House)
+
+system("quarto render Assignment_TWO.qmd --to html")
+
+
+
+
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
