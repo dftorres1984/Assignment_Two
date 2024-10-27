@@ -215,7 +215,7 @@ Attaching package: 'dplyr'</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Cleaning LIED Dataset </span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># I start the cleaning by checking the type of characters in this dataset. All of the columns with data are numeric; obviously the countryn column is character.  </span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># I check the dataset. </span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(LIED)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   32692 obs. of  22 variables:
@@ -242,7 +242,7 @@ Attaching package: 'dplyr'</code></pre>
  $ two_turnover_period              : num  0 0 0 0 0 0 0 0 0 0 ...
  $ sovereign                        : num  1 1 1 1 1 1 1 1 1 1 ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#They're all numeric except country which is a character string. This is a good sign. </span></span>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#All of the columns with data are numeric; obviously the "countryn" column is character.</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#I check for NAs. </span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(LIED)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -270,37 +270,36 @@ Attaching package: 'dplyr'</code></pre>
               two_turnover_period                         sovereign 
                                 0                                 0 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># I found that almost all of the NAs are in "V-Dem" column that I will not use and 1 NA exists in the YEAR column which is odd. </span></span>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># I found that almost all of the NAs are in "V-Dem" column that I will not used, and 1 NA exists in the YEAR column which is odd. </span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#I wanted to confirm which row in the column Year had a "NA"  </span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#I check the NA in Year and it is a row for CHILE which I will not use when subset the data. It was likely an error by the creator.  </span></span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>LIED_NA_Year <span class="ot">&lt;-</span> LIED[<span class="sc">!</span><span class="fu">complete.cases</span>(LIED<span class="sc">$</span>year),] </span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#I created a dataframe and determined it was for CHILE which I will not use when subset the data. This confirms it was likely an error by the creator of the dataset. </span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#This removes any whitespace in the country column</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>LIED<span class="sc">$</span>countryn<span class="ot">=</span><span class="fu">trimws</span>(LIED<span class="sc">$</span>countryn, <span class="at">whitespace =</span> <span class="st">"[</span><span class="sc">\\</span><span class="st">h</span><span class="sc">\\</span><span class="st">v]"</span>)</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Now clean file </span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>nowClean_LEAD <span class="ot">&lt;-</span> LIED</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(nowClean_LEAD,<span class="fu">file.path</span>(folder, <span class="st">"nowClean_LEAD.csv"</span>), <span class="at">row.names =</span> F)</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(nowClean_LEAD,<span class="fu">file.path</span>(folder, <span class="st">"nowClean_LEAD.csv"</span>), <span class="at">row.names =</span> F)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#This removes any whitespace in the country column</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>LIED<span class="sc">$</span>countryn<span class="ot">=</span><span class="fu">trimws</span>(LIED<span class="sc">$</span>countryn, <span class="at">whitespace =</span> <span class="st">"[</span><span class="sc">\\</span><span class="st">h</span><span class="sc">\\</span><span class="st">v]"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Now clean file </span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>nowClean_LEAD <span class="ot">&lt;-</span> LIED</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(nowClean_LEAD,<span class="fu">file.path</span>(folder, <span class="st">"Clean_LEAD.csv"</span>), <span class="at">row.names =</span> F)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(nowClean_LEAD,<span class="fu">file.path</span>(folder, <span class="st">"Clean_LEAD.csv"</span>), <span class="at">row.names =</span> F)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Formatting LIED dataset</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Import saved .csv file</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>LIED_import <span class="ot">&lt;-</span> rio<span class="sc">::</span><span class="fu">import</span>(<span class="st">"https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/nowClean_LEAD.csv"</span>)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co">#check the imported file</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(LIED_import)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Import saved .csv file</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>LIED_import <span class="ot">&lt;-</span> rio<span class="sc">::</span><span class="fu">import</span>(<span class="st">"https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_LEAD.csv"</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co">#check the imported file</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(LIED_import)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   32692 obs. of  23 variables:
- $ V1                               : int  1 2 3 4 5 6 7 8 9 10 ...
+<pre><code>'data.frame':   32692 obs. of  22 variables:
  $ countryn                         : chr  "United States" "United States" "United States" "United States" ...
  $ cow                              : int  2 2 2 2 2 2 2 2 2 2 ...
  $ vdem                             : int  20 20 20 20 20 20 20 20 20 20 ...
@@ -324,10 +323,10 @@ Attaching package: 'dplyr'</code></pre>
  $ two_turnover_period              : int  0 0 0 0 0 0 0 0 0 0 ...
  $ sovereign                        : int  1 1 1 1 1 1 1 1 1 1 ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I rename columns like "countryn" as country_name and capitalize the following columns: year, male_suffrage, female_suffrage, political_liberties, democratic_breakdown, and sovereign.     </span></span>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I rename columns like "countryn" as Country and capitalize the following columns: year, male_suffrage, female_suffrage, political_liberties, democratic_breakdown, and sovereign.     </span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>LIED_Updated <span class="ot">&lt;-</span> LIED_import <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">Country =</span> countryn, <span class="at">Year =</span> year, <span class="at">Male_Suffrage =</span> male_suffrage, <span class="at">Female_Suffrage =</span> female_suffrage, <span class="at">Political_Liberties =</span> political_liberties, <span class="at">Democratic_Breakdown =</span> democratic_breakdown, <span class="at">Sovereign =</span> sovereign)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#I select columns "countryn" "male_suffrage" "female_suffrage" "political_liberties" "democratic_breakdown" "sovereign" </span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#I select columns "Country", "Year", "Male_Suffrage","Female_Suffrage", "Political_Liberties" "Democratic_Breakdown" "Sovereign" </span></span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>LIED_Updated <span class="ot">&lt;-</span> LIED_Updated <span class="sc">%&gt;%</span> <span class="fu">select</span>(Country, Year, Male_Suffrage, Female_Suffrage, Political_Liberties, Democratic_Breakdown, Sovereign)</span>
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co">#I subset the df by filtering "Country_Name" for all major EU countries, USA, Canada, Japan, South Korea, New Zealand, and Australia and for years 2003 to 2020. I selected these years because all three datasets have data for these years. </span></span>
@@ -384,44 +383,38 @@ Attaching package: 'dplyr'</code></pre>
                 0                 0                 0 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I want to check if the numbers in the column are actual numbers </span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW03 PR</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(Freedom_House_2[<span class="fu">c</span>(<span class="st">"FIW03 PR"</span>, <span class="st">"FIW04 PR"</span>, <span class="st">"FIW05 PR"</span>, <span class="st">"FIW03 CL"</span>, <span class="st">"FIW04 CL"</span>, <span class="st">"FIW05 CL"</span>, <span class="st">"FIW03 Total"</span>, <span class="st">"FIW04 Total"</span>, <span class="st">"FIW05 Total"</span>)], grep, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "-2" "-" </code></pre>
+<pre><code>$`FIW03 PR`
+[1] "-2" "-" 
+
+$`FIW04 PR`
+[1] "-"
+
+$`FIW05 PR`
+[1] "-1" "-2" "-2" "-" 
+
+$`FIW03 CL`
+[1] "-"
+
+$`FIW04 CL`
+[1] "-"
+
+$`FIW05 CL`
+[1] "-"
+
+$`FIW03 Total`
+[1] "-1" "-" 
+
+$`FIW04 Total`
+[1] "-"
+
+$`FIW05 Total`
+[1] "-"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW04 PR</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "-"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW05 PR</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "-1" "-2" "-2" "-" </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW03 CL</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "-"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW04 CL</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "-"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW05 CL</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "-"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW03 Total</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "-1" "-" </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW04 Total</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "-"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">FIW05 Total</span><span class="st">`</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "-"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co">#The search found the negative numbers and dashes "-". According to the Freedom House webiste, negative numbers were reserved for countries with very low Political Rights scores. All dashes were converted to NAs.   </span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>Clean_Freedom_House_2 <span class="ot">&lt;-</span> Freedom_House_2 <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="st">`</span><span class="at">FIW03 PR</span><span class="st">`</span>,<span class="st">`</span><span class="at">FIW04 PR</span><span class="st">`</span>,<span class="st">`</span><span class="at">FIW05 PR</span><span class="st">`</span>, <span class="st">`</span><span class="at">FIW03 CL</span><span class="st">`</span>,<span class="st">`</span><span class="at">FIW04 CL</span><span class="st">`</span>, <span class="st">`</span><span class="at">FIW05 CL</span><span class="st">`</span>, <span class="st">`</span><span class="at">FIW03 Total</span><span class="st">`</span>, <span class="st">`</span><span class="at">FIW04 Total</span><span class="st">`</span>,<span class="st">`</span><span class="at">FIW05 Total</span><span class="st">`</span>), <span class="sc">~</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(.))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">#The search found the negative numbers and dashes "-". According to the Freedom House webiste, negative numbers were reserved for countries with very low Political Rights scores. All dashes were converted to NAs.   </span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>Clean_Freedom_House_2 <span class="ot">&lt;-</span> Freedom_House_2 <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="st">`</span><span class="at">FIW03 PR</span><span class="st">`</span>,<span class="st">`</span><span class="at">FIW04 PR</span><span class="st">`</span>,<span class="st">`</span><span class="at">FIW05 PR</span><span class="st">`</span>, <span class="st">`</span><span class="at">FIW03 CL</span><span class="st">`</span>,<span class="st">`</span><span class="at">FIW04 CL</span><span class="st">`</span>, <span class="st">`</span><span class="at">FIW05 CL</span><span class="st">`</span>, <span class="st">`</span><span class="at">FIW03 Total</span><span class="st">`</span>, <span class="st">`</span><span class="at">FIW04 Total</span><span class="st">`</span>,<span class="st">`</span><span class="at">FIW05 Total</span><span class="st">`</span>), <span class="sc">~</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(.))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: There were 9 warnings in `mutate()`.
 The first warning was:
@@ -430,39 +423,44 @@ Caused by warning:
 ! NAs introduced by coercion
 ℹ Run `dplyr::last_dplyr_warnings()` to see the 8 remaining warnings.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I wanted to make sure there are no whitespaces in the country column</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span><span class="ot">=</span><span class="fu">trimws</span>(Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span>, <span class="at">whitespace =</span> <span class="st">"[</span><span class="sc">\\</span><span class="st">h</span><span class="sc">\\</span><span class="st">v]"</span>)</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="co">#I checked if I converted the data columns to numeric.</span></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(Clean_Freedom_House_2, class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I eliminate whitespaces in the country column</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span><span class="ot">=</span><span class="fu">trimws</span>(Freedom_House_2<span class="sc">$</span><span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span>, <span class="at">whitespace =</span> <span class="st">"[</span><span class="sc">\\</span><span class="st">h</span><span class="sc">\\</span><span class="st">v]"</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co">#I recheck the data columns.  </span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Clean_Freedom_House_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Country/Territory              C/T?          FIW03 PR          FIW04 PR 
-      "character"       "character"         "numeric"         "numeric" 
-         FIW05 PR          FIW03 CL          FIW04 CL          FIW05 CL 
-        "numeric"         "numeric"         "numeric"         "numeric" 
-      FIW03 Total       FIW04 Total       FIW05 Total 
-        "numeric"         "numeric"         "numeric" </code></pre>
+<pre><code>'data.frame':   207 obs. of  11 variables:
+ $ Country/Territory: chr  "Abkhazia" "Afghanistan" "Albania" "Algeria" ...
+ $ C/T?             : chr  "t" "c" "c" "c" ...
+ $ FIW03 PR         : num  9 8 26 11 39 8 18 24 20 39 ...
+ $ FIW04 PR         : num  9 9 26 11 39 7 19 35 20 39 ...
+ $ FIW05 PR         : num  9 13 26 10 39 8 30 35 16 39 ...
+ $ FIW03 CL         : num  20 15 42 22 57 22 47 41 34 57 ...
+ $ FIW04 CL         : num  21 14 42 22 58 22 46 46 32 57 ...
+ $ FIW05 CL         : num  21 14 40 25 58 22 47 48 28 57 ...
+ $ FIW03 Total      : num  29 23 68 33 96 30 65 65 54 96 ...
+ $ FIW04 Total      : num  30 23 68 33 97 29 65 81 52 96 ...
+ $ FIW05 Total      : num  30 27 66 35 97 30 77 83 44 96 ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(Clean_Freedom_House_2,<span class="fu">file.path</span>(folder, <span class="st">"CleanData_Freedom_House_2.csv"</span>), <span class="at">row.names =</span> F)</span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(Clean_Freedom_House_2,<span class="fu">file.path</span>(folder, <span class="st">"Clean_Freedom_House_2.csv"</span>), <span class="at">row.names =</span> F)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(Clean_Freedom_House_2,<span class="fu">file.path</span>(folder, <span class="st">"Clean_Freedom_House_2.csv"</span>), <span class="at">row.names =</span> F)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(Clean_Freedom_House_2,<span class="fu">file.path</span>(folder, <span class="st">"Clean_Freedom_House_2.csv"</span>), <span class="at">row.names =</span> F)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Formatting Freedom_House_2 Dataset</span></span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Import the clean data </span></span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>Freedom_House_2_import <span class="ot">&lt;-</span> rio<span class="sc">::</span><span class="fu">import</span>(<span class="st">"https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_Freedom_House_2.csv"</span>)</span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="co">#I check the imported file and it looks correct.  </span></span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Freedom_House_2_import)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Formatting Freedom_House_2 Dataset</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Import the clean data </span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>Freedom_House_2_import <span class="ot">&lt;-</span> rio<span class="sc">::</span><span class="fu">import</span>(<span class="st">"https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_Freedom_House_2.csv"</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co">#I check the imported file.  </span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Freedom_House_2_import)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   207 obs. of  12 variables:
- $ V1               : int  1 2 3 4 5 6 7 8 9 10 ...
+<pre><code>'data.frame':   207 obs. of  11 variables:
  $ Country/Territory: chr  "Abkhazia" "Afghanistan" "Albania" "Algeria" ...
  $ C/T?             : chr  "t" "c" "c" "c" ...
  $ FIW03 PR         : int  9 8 26 11 39 8 18 24 20 39 ...
@@ -475,20 +473,19 @@ Caused by warning:
  $ FIW04 Total      : int  30 23 68 33 97 29 65 81 52 96 ...
  $ FIW05 Total      : int  30 27 66 35 97 30 77 83 44 96 ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># I want to change "Country/Territory" to "Country" and rename the other columns  </span></span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House_2 <span class="ot">&lt;-</span> Freedom_House_2_import <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">Country =</span> <span class="st">"Country/Territory"</span>, <span class="at">Political_Rights_2003 =</span> <span class="st">`</span><span class="at">FIW03 PR</span><span class="st">`</span>, <span class="at">Political_Rights_2004 =</span> <span class="st">`</span><span class="at">FIW04 PR</span><span class="st">`</span>, <span class="at">Political_Rights_2005 =</span> <span class="st">`</span><span class="at">FIW05 PR</span><span class="st">`</span>, <span class="at">Civil_Liberties_2003 =</span> <span class="st">`</span><span class="at">FIW03 CL</span><span class="st">`</span>, <span class="at">Civil_Liberties_2004 =</span> <span class="st">`</span><span class="at">FIW04 CL</span><span class="st">`</span>, <span class="at">Civil_Liberties_2005 =</span> <span class="st">`</span><span class="at">FIW05 CL</span><span class="st">`</span>, <span class="at">Total_Score_2003 =</span> <span class="st">`</span><span class="at">FIW03 Total</span><span class="st">`</span>, <span class="at">Total_Score_2004 =</span> <span class="st">`</span><span class="at">FIW04 Total</span><span class="st">`</span>, <span class="at">Total_Score_2005 =</span> <span class="st">`</span><span class="at">FIW05 Total</span><span class="st">`</span>)</span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="co">#I want to eliminate the "C/T?" column </span></span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House_2 <span class="ot">&lt;-</span> <span class="fu">subset</span>(Formatted_Freedom_House_2, <span class="at">select =</span> <span class="sc">-</span><span class="st">`</span><span class="at">C/T?</span><span class="st">`</span>)</span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Filter the countries to match the countries in LIED database.  </span></span>
-<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House_2 <span class="ot">&lt;-</span> Formatted_Freedom_House_2 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Country <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Greece"</span>, <span class="st">"Italy"</span>, <span class="st">"Austria"</span>, <span class="st">"United States"</span>, <span class="st">"South Korea"</span>, <span class="st">"Portugal"</span>, <span class="st">"Japan"</span>, <span class="st">"Belgium"</span>, <span class="st">"Czech Republic"</span>, <span class="st">"Spain"</span>, <span class="st">"United Kingdom"</span>, <span class="st">"Canada"</span>, <span class="st">"France"</span>, <span class="st">"Iceland"</span>, <span class="st">"Australia"</span>, <span class="st">"Germany"</span>, <span class="st">"Netherlands"</span>, <span class="st">"Ireland"</span>, <span class="st">"Finland"</span>, <span class="st">"Switzerland"</span>, <span class="st">"New Zealand"</span>, <span class="st">"Denmark"</span>, <span class="st">"Sweden"</span>, <span class="st">"Norway"</span>, <span class="st">"Hungary"</span>, <span class="st">"Poland"</span>, <span class="st">"Slovakia"</span>, <span class="st">"Estonia"</span>, <span class="st">"Latvia"</span>, <span class="st">"Lithuania"</span>, <span class="st">"Slovenia"</span>, <span class="st">"Cyprus"</span>, <span class="st">"Malta"</span>, <span class="st">"Bulgaria"</span>, <span class="st">"Romania"</span>, <span class="st">"Croatia"</span>))</span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Confirming that the columns of data are numeric and not character</span></span>
-<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Formatted_Freedom_House_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># I change "Country/Territory" to "Country" and rename the other columns include with the correct year. </span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House_2 <span class="ot">&lt;-</span> Freedom_House_2_import <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">Country =</span> <span class="st">"Country/Territory"</span>, <span class="at">Political_Rights_2003 =</span> <span class="st">`</span><span class="at">FIW03 PR</span><span class="st">`</span>, <span class="at">Political_Rights_2004 =</span> <span class="st">`</span><span class="at">FIW04 PR</span><span class="st">`</span>, <span class="at">Political_Rights_2005 =</span> <span class="st">`</span><span class="at">FIW05 PR</span><span class="st">`</span>, <span class="at">Civil_Liberties_2003 =</span> <span class="st">`</span><span class="at">FIW03 CL</span><span class="st">`</span>, <span class="at">Civil_Liberties_2004 =</span> <span class="st">`</span><span class="at">FIW04 CL</span><span class="st">`</span>, <span class="at">Civil_Liberties_2005 =</span> <span class="st">`</span><span class="at">FIW05 CL</span><span class="st">`</span>, <span class="at">Total_Score_2003 =</span> <span class="st">`</span><span class="at">FIW03 Total</span><span class="st">`</span>, <span class="at">Total_Score_2004 =</span> <span class="st">`</span><span class="at">FIW04 Total</span><span class="st">`</span>, <span class="at">Total_Score_2005 =</span> <span class="st">`</span><span class="at">FIW05 Total</span><span class="st">`</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co">#I eliminate the "C/T?" column. I'll only keep countries.  </span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House_2 <span class="ot">&lt;-</span> <span class="fu">subset</span>(Formatted_Freedom_House_2, <span class="at">select =</span> <span class="sc">-</span><span class="st">`</span><span class="at">C/T?</span><span class="st">`</span>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Filter the countries to match the countries in LIED database.  </span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House_2 <span class="ot">&lt;-</span> Formatted_Freedom_House_2 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Country <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Greece"</span>, <span class="st">"Italy"</span>, <span class="st">"Austria"</span>, <span class="st">"United States"</span>, <span class="st">"South Korea"</span>, <span class="st">"Portugal"</span>, <span class="st">"Japan"</span>, <span class="st">"Belgium"</span>, <span class="st">"Czech Republic"</span>, <span class="st">"Spain"</span>, <span class="st">"United Kingdom"</span>, <span class="st">"Canada"</span>, <span class="st">"France"</span>, <span class="st">"Iceland"</span>, <span class="st">"Australia"</span>, <span class="st">"Germany"</span>, <span class="st">"Netherlands"</span>, <span class="st">"Ireland"</span>, <span class="st">"Finland"</span>, <span class="st">"Switzerland"</span>, <span class="st">"New Zealand"</span>, <span class="st">"Denmark"</span>, <span class="st">"Sweden"</span>, <span class="st">"Norway"</span>, <span class="st">"Hungary"</span>, <span class="st">"Poland"</span>, <span class="st">"Slovakia"</span>, <span class="st">"Estonia"</span>, <span class="st">"Latvia"</span>, <span class="st">"Lithuania"</span>, <span class="st">"Slovenia"</span>, <span class="st">"Cyprus"</span>, <span class="st">"Malta"</span>, <span class="st">"Bulgaria"</span>, <span class="st">"Romania"</span>, <span class="st">"Croatia"</span>))</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Confirming that the columns of data are numeric and not character</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Formatted_Freedom_House_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   36 obs. of  11 variables:
- $ V1                   : int  10 11 18 27 32 45 47 48 49 58 ...
+<pre><code>'data.frame':   36 obs. of  10 variables:
  $ Country              : chr  "Australia" "Austria" "Belgium" "Bulgaria" ...
  $ Political_Rights_2003: int  39 40 39 36 39 31 39 37 40 37 ...
  $ Political_Rights_2004: int  39 40 40 36 40 31 39 37 40 37 ...
@@ -500,20 +497,20 @@ Caused by warning:
  $ Total_Score_2004     : int  96 99 99 86 99 79 96 89 99 89 ...
  $ Total_Score_2005     : int  96 99 98 87 98 82 96 93 99 93 ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(Formatted_Freedom_House_2,<span class="fu">file.path</span>(folder, <span class="st">"Formatted_Freedom_House_2.RDS"</span>))</span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(Formatted_Freedom_House_2,<span class="fu">file.path</span>(folder, <span class="st">"Formatted_Freedom_House_2.RDS"</span>))}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(Formatted_Freedom_House_2,<span class="fu">file.path</span>(folder, <span class="st">"Formatted_Freedom_House_2.RDS"</span>))</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(Formatted_Freedom_House_2,<span class="fu">file.path</span>(folder, <span class="st">"Formatted_Freedom_House_2.RDS"</span>))}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Data Cleaning Freedom House </span></span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="co">#The type of data looks good. The non-numeric columns are character and the columns with data are all numeric. This is the main dataset used by Freedom House so I'm not surprised that the data quality is high.   </span></span>
-<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Freedom_House)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Data Cleaning Freedom House </span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="co">#The type of data looks good. The non-numeric columns are character and the columns with data are all numeric. This is the main dataset used by Freedom House so I'm not surprised that the data quality is high.   </span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Freedom_House)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   3129 obs. of  36 variables:
  $ Country/Territory: chr  "Abkhazia" "Afghanistan" "Albania" "Algeria" ...
@@ -553,32 +550,31 @@ Caused by warning:
  $ ...35            : logi  NA NA NA NA NA NA ...
  $ x                : logi  NA NA NA NA NA NA ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I wanted to make sure there are no whitespaces in the country column</span></span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>Freedom_House<span class="sc">$</span><span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span><span class="ot">=</span><span class="fu">trimws</span>(Freedom_House<span class="sc">$</span><span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span>, <span class="at">whitespace =</span> <span class="st">"[</span><span class="sc">\\</span><span class="st">h</span><span class="sc">\\</span><span class="st">v]"</span>)</span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>Clean_Freedom_House <span class="ot">&lt;-</span> Freedom_House </span>
-<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Saving Formatted file</span></span>
-<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
-<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
-<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
-<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
-<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
-<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(Clean_Freedom_House,<span class="fu">file.path</span>(folder, <span class="st">"Clean_Freedom_House.csv"</span>), <span class="at">row.names =</span> F)</span>
-<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(Clean_Freedom_House,<span class="fu">file.path</span>(folder, <span class="st">"Clean_Freedom_House.csv"</span>), <span class="at">row.names =</span> F)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I wanted to make sure there are no whitespaces in the country column</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>Freedom_House<span class="sc">$</span><span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span><span class="ot">=</span><span class="fu">trimws</span>(Freedom_House<span class="sc">$</span><span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span>, <span class="at">whitespace =</span> <span class="st">"[</span><span class="sc">\\</span><span class="st">h</span><span class="sc">\\</span><span class="st">v]"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>Clean_Freedom_House <span class="ot">&lt;-</span> Freedom_House </span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Saving Formatted file</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(Clean_Freedom_House,<span class="fu">file.path</span>(folder, <span class="st">"Clean_Freedom_House.csv"</span>), <span class="at">row.names =</span> F)</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write.csv</span>(Clean_Freedom_House,<span class="fu">file.path</span>(folder, <span class="st">"Clean_Freedom_House.csv"</span>), <span class="at">row.names =</span> F)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Formatting Freedom_House Dataset</span></span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Import clean Freedom House dataset</span></span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>Freedom_House_import <span class="ot">&lt;-</span> rio<span class="sc">::</span><span class="fu">import</span>(<span class="st">"https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_Freedom_House.csv"</span>)  </span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a><span class="co">#I check the imported dataset</span></span>
-<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Freedom_House_import)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Formatting Freedom_House Dataset</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Import clean Freedom House dataset</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>Freedom_House_import <span class="ot">&lt;-</span> rio<span class="sc">::</span><span class="fu">import</span>(<span class="st">"https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_Freedom_House.csv"</span>)  </span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="co">#I check the imported dataset</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Freedom_House_import)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   3129 obs. of  37 variables:
- $ V1               : int  1 2 3 4 5 6 7 8 9 10 ...
+<pre><code>'data.frame':   3129 obs. of  36 variables:
  $ Country/Territory: chr  "Abkhazia" "Afghanistan" "Albania" "Algeria" ...
  $ Region           : chr  "Eurasia" "Asia" "Europe" "MENA" ...
  $ C/T?             : chr  "t" "c" "c" "c" ...
@@ -616,40 +612,32 @@ Caused by warning:
  $ ...35            : logi  NA NA NA NA NA NA ...
  $ x                : logi  NA NA NA NA NA NA ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I'll need to rename "PR" "Political_Rights" CL as "Civil_Liberties" and "Total" as "Total Score" convert "Edition" into "Year"</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House <span class="ot">&lt;-</span> Freedom_House_import <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">Country =</span> <span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span>, <span class="at">Year =</span> <span class="st">`</span><span class="at">Edition</span><span class="st">`</span>, <span class="at">Political_Rights =</span> <span class="st">`</span><span class="at">PR</span><span class="st">`</span>, <span class="at">Civil_Liberties =</span> <span class="st">`</span><span class="at">CL</span><span class="st">`</span>, <span class="at">Total_Score =</span> <span class="st">`</span><span class="at">Total</span><span class="st">`</span>)</span>
-<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="co">#I want to keep the major columns "Country", "Year", "Political_Rights" "Civil_Liberties" and "Total_Score" </span></span>
-<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House <span class="ot">&lt;-</span> Formatted_Freedom_House <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="st">"Country"</span>, <span class="st">"Year"</span>, <span class="st">"Political_Rights"</span>, <span class="st">"Civil_Liberties"</span>, <span class="st">"Total_Score"</span>)</span>
-<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Filter the countries and years for the same countries used in Freedom_House_2 and LIED  </span></span>
-<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House <span class="ot">&lt;-</span> Formatted_Freedom_House <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="st">`</span><span class="at">Country</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Greece"</span>, <span class="st">"Italy"</span>, <span class="st">"Austria"</span>, <span class="st">"United States"</span>, <span class="st">"South Korea"</span>, <span class="st">"Portugal"</span>, <span class="st">"Japan"</span>, <span class="st">"Belgium"</span>, <span class="st">"Czech Republic"</span>, <span class="st">"Spain"</span>, <span class="st">"United Kingdom"</span>, <span class="st">"Canada"</span>, <span class="st">"France"</span>, <span class="st">"Iceland"</span>, <span class="st">"Australia"</span>, <span class="st">"Germany"</span>, <span class="st">"Netherlands"</span>, <span class="st">"Ireland"</span>, <span class="st">"Finland"</span>, <span class="st">"Switzerland"</span>, <span class="st">"New Zealand"</span>, <span class="st">"Denmark"</span>, <span class="st">"Sweden"</span>, <span class="st">"Norway"</span>, <span class="st">"Hungary"</span>, <span class="st">"Poland"</span>, <span class="st">"Slovakia"</span>, <span class="st">"Estonia"</span>, <span class="st">"Latvia"</span>, <span class="st">"Lithuania"</span>, <span class="st">"Slovenia"</span>, <span class="st">"Cyprus"</span>, <span class="st">"Malta"</span>, <span class="st">"Bulgaria"</span>, <span class="st">"Romania"</span>, <span class="st">"Croatia"</span>) <span class="sc">&amp;</span> Year<span class="sc">&gt;=</span> <span class="dv">2003</span> <span class="sc">&amp;</span> Year<span class="sc">&lt;=</span><span class="dv">2020</span>)</span>
-<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Checking NAs for Freedom_House_Updated dataframe </span></span>
-<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(Formatted_Freedom_House, class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I'll need to rename "PR" "Political_Rights" CL as "Civil_Liberties" and "Total" as "Total Score" convert "Edition" into "Year"</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House <span class="ot">&lt;-</span> Freedom_House_import <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">Country =</span> <span class="st">`</span><span class="at">Country/Territory</span><span class="st">`</span>, <span class="at">Year =</span> <span class="st">`</span><span class="at">Edition</span><span class="st">`</span>, <span class="at">Political_Rights =</span> <span class="st">`</span><span class="at">PR</span><span class="st">`</span>, <span class="at">Civil_Liberties =</span> <span class="st">`</span><span class="at">CL</span><span class="st">`</span>, <span class="at">Total_Score =</span> <span class="st">`</span><span class="at">Total</span><span class="st">`</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="co">#I want to select the major columns "Country", "Year", "Political_Rights" "Civil_Liberties" and "Total_Score" </span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House <span class="ot">&lt;-</span> Formatted_Freedom_House <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="st">"Country"</span>, <span class="st">"Year"</span>, <span class="st">"Political_Rights"</span>, <span class="st">"Civil_Liberties"</span>, <span class="st">"Total_Score"</span>)</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Filter the countries and years for the same countries used in Freedom_House_2 and LIED  </span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>Formatted_Freedom_House <span class="ot">&lt;-</span> Formatted_Freedom_House <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="st">`</span><span class="at">Country</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Greece"</span>, <span class="st">"Italy"</span>, <span class="st">"Austria"</span>, <span class="st">"United States"</span>, <span class="st">"South Korea"</span>, <span class="st">"Portugal"</span>, <span class="st">"Japan"</span>, <span class="st">"Belgium"</span>, <span class="st">"Czech Republic"</span>, <span class="st">"Spain"</span>, <span class="st">"United Kingdom"</span>, <span class="st">"Canada"</span>, <span class="st">"France"</span>, <span class="st">"Iceland"</span>, <span class="st">"Australia"</span>, <span class="st">"Germany"</span>, <span class="st">"Netherlands"</span>, <span class="st">"Ireland"</span>, <span class="st">"Finland"</span>, <span class="st">"Switzerland"</span>, <span class="st">"New Zealand"</span>, <span class="st">"Denmark"</span>, <span class="st">"Sweden"</span>, <span class="st">"Norway"</span>, <span class="st">"Hungary"</span>, <span class="st">"Poland"</span>, <span class="st">"Slovakia"</span>, <span class="st">"Estonia"</span>, <span class="st">"Latvia"</span>, <span class="st">"Lithuania"</span>, <span class="st">"Slovenia"</span>, <span class="st">"Cyprus"</span>, <span class="st">"Malta"</span>, <span class="st">"Bulgaria"</span>, <span class="st">"Romania"</span>, <span class="st">"Croatia"</span>) <span class="sc">&amp;</span> Year<span class="sc">&gt;=</span> <span class="dv">2003</span> <span class="sc">&amp;</span> Year<span class="sc">&lt;=</span><span class="dv">2020</span>)</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Checking NAs for Freedom_House_Updated dataframe </span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(Formatted_Freedom_House, class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         Country             Year Political_Rights  Civil_Liberties 
      "character"        "integer"        "integer"        "integer" 
      Total_Score 
        "integer" </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Saving Formatted file</span></span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
-<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
-<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
-<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
-<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
-<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(Formatted_Freedom_House,<span class="fu">file.path</span>(folder, <span class="st">"Formatted_Freedom_House.RDS"</span>))</span>
-<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(Formatted_Freedom_House,<span class="fu">file.path</span>(folder, <span class="st">"Formatted_Freedom_House.RDS"</span>))}   </span>
-<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Formatted_Freedom_House)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   540 obs. of  5 variables:
- $ Country         : chr  "Australia" "Austria" "Belgium" "Bulgaria" ...
- $ Year            : int  2020 2020 2020 2020 2020 2020 2020 2020 2020 2020 ...
- $ Political_Rights: int  40 37 39 34 40 36 38 36 40 38 ...
- $ Civil_Liberties : int  57 56 57 46 58 49 56 55 57 56 ...
- $ Total_Score     : int  97 93 96 80 98 85 94 91 97 94 ...</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system</span>(<span class="st">"quarto render Assignment_TWO.qmd --to html"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Saving Formatted file</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"DataCleanAndFormatted"</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="co">#check if the folder exists </span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(folder)) {</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Create folder </span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(Formatted_Freedom_House,<span class="fu">file.path</span>(folder, <span class="st">"Formatted_Freedom_House.RDS"</span>))</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(Formatted_Freedom_House,<span class="fu">file.path</span>(folder, <span class="st">"Formatted_Freedom_House.RDS"</span>))}   </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <code>echo: false</code> option disables the printing of code (only output is displayed).</p>
 </section>
