@@ -23,8 +23,6 @@ library(stringr)
 LIED <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/LIED_6.6.xlsx")
 Freedom_House <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=2)
 Freedom_House_2 <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=3)
-head(LIED)
-head(Freedom_House)
 ```
 
 You can add options to executable code like this
