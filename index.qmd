@@ -23,6 +23,7 @@ library(stringr)
 LIED <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/LIED_6.6.xlsx")
 Freedom_House <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=2)
 Freedom_House_2 <- rio::import("https://github.com/DACSS-690/Week-One-Assignment/raw/refs/heads/main/Data/Freedom_House_Data_from_2003_to_2020.xlsx", which=3)
+V_Dem <- read.csv("/Users/dftorres/Documents/GitHub/DPP690/Week-One-Assignment/Data/V_Dem_CORE.csv")
 ```
 
 You can add options to executable code like this
@@ -205,12 +206,42 @@ if(!dir.exists(folder)) {
   saveRDS(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.RDS"))
 } else {
   saveRDS(Formatted_Freedom_House,file.path(folder, "Formatted_Freedom_House.RDS"))}   
+```
+
+```{r}
+#Data Cleaning V-DEM
+
+# I check the dataset using STR
+str(V_Dem)
+
+# I want to subset the large dataset  
+colSums(is.na(V_Dem))
+
+#Before I continue to clean the data, it seems prudent to subset the columns so I can check the quality of the data for additional clenaning. 
+Clean_V_Dem <- V_Dem %>% select(country_name, year, v2x_polyarchy, v2x_libdem, v2x_partipdem, v2x_delibdem, v2x_egaldem)
+
+#I want to review the data of the subsetted data 
+str(Clean_V_Dem)
+
+#The data columns all look very clean for future use. The countries are character strings while the remaining columns are numerics. In terms of the cleaning process, it's relatively clean except that I want to eliminate any possible whitespaces.  
+
+#I wanted to make sure there are no whitespaces in the country column
+Clean_V_Dem$`country_name`=trimws(Clean_V_Dem$`country_name`, whitespace = "[\\h\\v]")
+
+#Saving Formatted file
+folder <- "DataCleanAndFormatted"
+#check if the folder exists 
+if(!dir.exists(folder)) {
+  #Create folder 
+  dir.create(folder)
+  write.csv(Clean_V_Dem,file.path(folder, "Clean_V_Dem.csv"), row.names = F)
+} else {
+  write.csv(Clean_V_Dem,file.path(folder, "Clean_V_Dem.csv"), row.names = F)}
 
 
+```
 
-
-
-
+```{r}
 
 ```
 
