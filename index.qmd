@@ -132,7 +132,7 @@ Freedom_House_2_import <- rio::import("https://github.com/dftorres1984/Assignmen
 str(Freedom_House_2_import)
 
 # I change "Country/Territory" to "Country" and rename the other columns include with the correct year. 
-Formatted_Freedom_House_2 <- Freedom_House_2_import %>% rename(Country = "Country/Territory", Political_Rights_2003 = `FIW03 PR`, Political_Rights_2004 = `FIW04 PR`, Political_Rights_2005 = `FIW05 PR`, Civil_Liberties_2003 = `FIW03 CL`, Civil_Liberties_2004 = `FIW04 CL`, Civil_Liberties_2005 = `FIW05 CL`, Total_Score_2003 = `FIW03 Total`, Total_Score_2004 = `FIW04 Total`, Total_Score_2005 = `FIW05 Total`)
+Formatted_Freedom_House_2 <- Freedom_House_2_import %>% rename(Country = "Country/Territory", `Political Rights_2003` = `FIW03 PR`, `Political Rights_2004` = `FIW04 PR`, `Political Rights_2005` = `FIW05 PR`, `Civil Liberties_2003` = `FIW03 CL`, `Civil Liberties_2004` = `FIW04 CL`, `Civil Liberties_2005` = `FIW05 CL`, `Total Score_2003` = `FIW03 Total`, `Total Score_2004` = `FIW04 Total`, `Total Score_2005` = `FIW05 Total`)
 
 #I eliminate the "C/T?" column. I'll only keep countries.  
 Formatted_Freedom_House_2 <- subset(Formatted_Freedom_House_2, select = -`C/T?`)
@@ -140,7 +140,10 @@ Formatted_Freedom_House_2 <- subset(Formatted_Freedom_House_2, select = -`C/T?`)
 #Filter the countries to match the countries in LIED database.  
 Formatted_Freedom_House_2 <- Formatted_Freedom_House_2 %>% filter(Country %in% c("Greece", "Italy", "Austria", "United States", "South Korea", "Portugal", "Japan", "Belgium", "Czech Republic", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia"))
 
-#Confirming that the columns of data are numeric and not character
+Formatted_Freedom_House_2 <- Formatted_Freedom_House_2 %>% pivot_longer( cols = !Country, names_to = c("Variable", "Year"), names_sep = "_", values_to = "Data")
+
+Formatted_Freedom_House_2 <- Formatted_Freedom_House_2 %>% pivot_wider(names_from = c(Variable), values_from = Data)
+
 str(Formatted_Freedom_House_2)
 
 folder <- "DataCleanAndFormatted"
@@ -151,6 +154,7 @@ if(!dir.exists(folder)) {
   saveRDS(Formatted_Freedom_House_2,file.path(folder, "Formatted_Freedom_House_2.RDS"))
 } else {
   saveRDS(Formatted_Freedom_House_2,file.path(folder, "Formatted_Freedom_House_2.RDS"))}
+
 
 ```
 
@@ -217,7 +221,7 @@ str(V_Dem)
 # I want to subset the large dataset  
 colSums(is.na(V_Dem))
 
-#Before I continue to clean the data, it seems prudent to subset the columns so I can check the quality of the data for additional clenaning. 
+#Before I continue to clean the data, it seems logical to subset the columns so I can check the data type for additional cleaning issues.  
 Clean_V_Dem <- V_Dem %>% select(country_name, year, v2x_polyarchy, v2x_libdem, v2x_partipdem, v2x_delibdem, v2x_egaldem)
 
 #I want to review the data of the subsetted data 
@@ -242,7 +246,13 @@ if(!dir.exists(folder)) {
 ```
 
 ```{r}
+V_Dem_import <- rio::import("https://github.com/dftorres1984/Assignment_Two/raw/refs/heads/main/DataCleanAndFormatted/Clean_V_Dem.csv")  
 
+Formatted_V_Dem <- V_Dem_import %>% rename(Country = `country_name`, Year = `year`, Polyarchy_Score = `v2x_polyarchy`, Liberal_Dem_Score = `v2x_libdem`, Participation_Dem_Score = `v2x_partipdem`, Deliberative_Dem_Score = `v2x_delibdem`, Egalitarian_Dem_Score = `v2x_egaldem`)
+
+#As I was doing the cleaning, I selected the key columns. 
+
+Formatted_V_Dem <- Formatted_V_Dem %>% filter (`Country` %in% c("Greece", "Italy", "Austria", "United States of America", "South Korea", "Portugal", "Japan", "Belgium", "Czechia", "Spain", "United Kingdom", "Canada", "France", "Iceland", "Australia", "Germany", "Netherlands", "Ireland", "Finland", "Switzerland", "New Zealand", "Denmark", "Sweden", "Norway", "Hungary", "Poland", "Slovakia", "Estonia", "Latvia", "Lithuania", "Slovenia", "Cyprus", "Malta", "Bulgaria", "Romania", "Croatia") & Year>= 2003 & Year<=2020)
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
